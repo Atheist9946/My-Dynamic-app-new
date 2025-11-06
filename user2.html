@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratch & Win</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css2/user2.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <h1>Scratch & Win</h1>
+
+    <!-- Exit Icon (shown during gameplay) -->
+    <div class="exit-icon" role="button" aria-label="Exit Game" onclick="goToUserPanel()">✕</div>
+
+    <!-- Fullscreen Overlay -->
+    <div class="fullscreen-overlay" id="fullscreen-overlay">
+        <div class="close-fullscreen">
+            <i class="fas fa-times"></i>
+        </div>
+        <div class="fullscreen-content">
+            <div class="fullscreen-text" id="fullscreen-text"></div>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div class="instructions-modal" id="instructions-modal">
+        <div class="instructions-content">
+            <span class="close-instructions" onclick="closeInstructions()">×</span>
+            <h2 class="instructions-title">Instructions for Username & Password</h2>
+            <div class="instructions-list">
+                <h3>Nickname Requirements:</h3>
+                <ul>
+                    <li>Alphabets only (a-z, A-Z)</li>
+                    <li>Spaces are optional</li>
+                </ul>
+                <h3>Username Requirements:</h3>
+                <ul>
+                    <li>6 to 15 characters long</li>
+                    <li>Must contain at least one special character: @, #, $, -, _, %</li>
+                    <li>Must contain at least one number (0-9)</li>
+                    <li>All alphabets must be lowercase (automatically converted)</li>
+                    <li>Cannot contain spaces</li>
+                </ul>
+                <h3>Password Requirements:</h3>
+                <ul>
+                    <li>8 to 15 characters long</li>
+                    <li>Must contain at least one special character: !, @, #, $, %, ^, &, *, -, _, =, +, \, |, /, ?, >, <, .</li>
+                    <li>Must contain at least one number (0-9)</li>
+                    <li>Must contain both uppercase and lowercase letters</li>
+                    <li>Case sensitive</li>
+                    <li>Cannot contain spaces</li>
+                </ul>
+            </div>
+            <button class="btn" onclick="closeInstructions()">Close</button>
+        </div>
+    </div>
+
+    <!-- User Icon -->
+    <div class="user-icon" role="button" aria-label="User Login" onclick="showLogin()">👤</div>
+
+    <!-- Logout Icon -->
+    <div class="logout-icon" role="button" aria-label="Logout" onclick="userLogout()">🚪</div>
+
+    <!-- Login Form -->
+    <div class="login-form" id="login-form">
+        <div class="form-title">Login</div>
+        <button class="btn fb-login" onclick="continueWithFacebook()">
+            Continue with Facebook
+        </button>
+        <div class="divider">
+            <span class="divider-text">OR</span>
+        </div>
+        <form onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <input type="text" id="login-username" placeholder="username (auto lowercase)" aria-label="Username" oninput="this.value = this.value.toLowerCase()">
+            </div>
+            <div class="input-group">
+                <input type="password" id="login-password" placeholder="Password" aria-label="Password">
+                <span class="toggle-password" onclick="togglePassword('login-password')">👁️</span>
+            </div>
+            <button class="btn" type="submit">Log in</button>
+        </form>
+        <div class="form-footer">
+            <a href="#" onclick="forgotPassword()">Forgot password?</a>
+        </div>
+        <div class="divider"></div>
+        <div class="form-footer">
+            Don't have an account? <a href="#" onclick="showSignup(event)">Sign up</a>
+        </div>
+        <button class="secondary-btn" onclick="redirectToAdminPage()">Close</button>
+    </div>
+
+    <!-- Signup Form -->
+    <div class="signup-form" id="signup-form">
+        <div class="form-title">Sign Up</div>
+        <form onsubmit="handleSignUp(event)">
+            <div class="input-group">
+                <input type="text" id="signup-nickname" placeholder="Nickname" aria-label="Nickname" oninput="validateNickname()">
+                <small id="nickname-error" style="color: red; display: none;"></small>
+            </div>
+            <div class="input-group">
+                <input type="text" id="signup-username" placeholder="Username (auto lowercase)" aria-label="Username" oninput="this.value = this.value.toLowerCase(); validateUsername()">
+                <small id="username-error" style="color: red; display: none;"></small>
+            </div>
+            <div class="input-group">
+                <input type="password" id="signup-password" placeholder="Password" aria-label="Password" oninput="validatePassword()">
+                <span class="toggle-password" onclick="togglePassword('signup-password')">👁️</span>
+                <small id="password-error" style="color: red; display: none;"></small>
+            </div>
+            <button class="btn" type="submit">Sign Up</button>
+        </form>
+        <div class="form-footer">
+            By signing up, you agree to our <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.
+            <br>
+            <a href="#" onclick="showInstructions()">Instructions for Username & Password</a>
+        </div>
+        <div class="divider"></div>
+        <div class="form-footer">
+            Already have an account? <a href="#" onclick="showLogin()">Log in</a>
+        </div>
+        <button class="secondary-btn" onclick="showLogin()">Close</button>
+    </div>
+
+    <!-- Enhanced User Panel -->
+    <div class="user-panel" id="user-panel">
+        <div class="user-panel-content">
+            <h2>Welcome, <span id="user-nickname"></span></h2>
+            <div class="panel-section">
+                <div class="panel-section-title">
+                    <i class="fas fa-paint-brush"></i> Card Appearance
+                </div>
+                <div class="form-group">
+                    <label>Card Color Before Scratching:</label>
+                    <div class="form-row">
+                        <input type="color" id="cardColorBefore" value="#F06292" aria-label="Card Color Before Scratching">
+                        <span id="cardColorBeforeValue">#F06292</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Card Color After Scratching:</label>
+                    <div class="form-row">
+                        <input type="color" id="cardColorAfter" value="#FFC1E3" aria-label="Card Color After Scratching">
+                        <span id="cardColorAfterValue">#FFC1E3</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Revealed Text Size:</label>
+                    <input type="number" id="revealedTextSize" min="10" max="50" value="14" aria-label="Revealed Text Size">
+                </div>
+                <div class="form-group">
+                    <label>Revealed Text Color:</label>
+                    <div class="form-row">
+                        <input type="color" id="revealedTextColor" value="#B71C1C" aria-label="Revealed Text Color">
+                        <span id="revealedTextColorValue">#B71C1C</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Revealed Text Position:</label>
+                    <select id="revealedPosition" aria-label="Revealed Text and Image Position">
+                        <option value="top-center">Top Center</option>
+                        <option value="middle-center">Middle Center</option>
+                        <option value="bottom-center">Bottom Center</option>
+                    </select>
+                </div>
+            </div>
+            <div class="panel-section">
+                <div class="panel-section-title">
+                    <i class="fas fa-edit"></i> Manage Prize Texts
+                </div>
+                <div class="form-group">
+                    <label>Add New Prize Text:</label>
+                    <input type="text" id="addText" placeholder="Enter text to add" aria-label="Add Text">
+                    <button class="btn" onclick="addText()">Add Prize</button>
+                </div>
+                <div class="form-group">
+                    <label>Delete Prize Text:</label>
+                    <select id="deleteTextSelect" aria-label="Select Text to Delete"></select>
+                    <button class="btn" onclick="deleteText()">Delete Selected</button>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn" onclick="resetSettings()">
+                    <i class="fas fa-undo"></i> Reset Settings
+                </button>
+                <button class="btn" onclick="applySettings()">
+                    <i class="fas fa-save"></i> Apply Settings
+                </button>
+                <button class="btn" onclick="userLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+            <!-- Create Public Card Button -->
+            <button class="btn create-card-btn" onclick="redirectToPCM()">
+                <i class="fas fa-plus-circle"></i> Create Public Card
+            </button>
+            <button class="btn play-now-btn" onclick="playGame()">
+                <i class="fas fa-play"></i> Play Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Controls (Refresh and Scroll Buttons) -->
+    <div class="game-controls" id="game-controls" style="display: none;">
+        <div class="scroll-buttons">
+            <button class="btn" id="scroll-up-btn" onmousedown="startScrolling('up')" onmouseup="stopScrolling()" ontouchstart="startScrolling('up')" ontouchend="stopScrolling()">↑</button>
+            <button class="btn" id="scroll-down-btn" onmousedown="startScrolling('down')" onmouseup="stopScrolling()" ontouchstart="startScrolling('down')" ontouchend="stopScrolling()">↓</button>
+        </div>
+        <button class="btn" id="refresh-button" onclick="resetCards()">Refresh Cards</button>
+    </div>
+
+    <!-- Scratch Cards Container -->
+    <div class="container" id="container" style="display: none;"></div>
+
+    <script src="/js/user2.js"></script>
+</body>
+</html>

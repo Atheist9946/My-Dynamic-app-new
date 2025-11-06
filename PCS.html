@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Flip Cards</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css2/PCS.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <h1>3D Flip Cards</h1>
+        <div class="cards-container" id="cardsContainer">
+            <!-- Cards will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Comments Modal -->
+    <div class="modal-overlay" id="commentsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Comments</h3>
+                <button class="close-modal" id="closeModal">×</button>
+            </div>
+            <div class="comments-list" id="commentsList">
+                <!-- Comments will be loaded here -->
+            </div>
+            <div class="comment-form">
+                <input type="text" class="comment-input" id="commentInput" placeholder="Add a comment...">
+                <button class="submit-comment" id="submitComment" onclick="addComment()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/PCS.js"></script>
+</body>
+</html>

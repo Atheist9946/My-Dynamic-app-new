@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create and Manage Cards</title>
+    <link rel="stylesheet" href="/css2/PCM.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Montserrat:wght@400;700&family=Dancing+Script:wght@400;700&family=Indie+Flower&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Create and Manage Cards</h1>
+
+        <!-- Card Creation Form -->
+        <div class="card-form">
+            <form onsubmit="createNewCard(event)">
+                <div class="form-group">
+                    <label for="cardHeading">Card Heading (with Emoji)</label>
+                    <input type="text" id="cardHeading" placeholder="Enter card heading with emoji..." required>
+                </div>
+                <div class="form-group">
+                    <label for="cardContent">Card Content (with Emoji)</label>
+                    <textarea id="cardContent" placeholder="Enter your card content with emoji..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="secondaryLanguage">Secondary Language Content (Optional)</label>
+                    <textarea id="secondaryLanguage" placeholder="Enter content in another language..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="fontStyle">Font Style</label>
+                    <select id="fontStyle">
+                        <option value="font-roboto">Roboto</option>
+                        <option value="font-pacifico">Pacifico</option>
+                        <option value="font-montserrat">Montserrat</option>
+                        <option value="font-dancing">Dancing Script</option>
+                        <option value="font-indie">Indie Flower</option>
+                    </select>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="allowComments" checked>
+                    <label for="allowComments">Allow Comments</label>
+                </div>
+                <button class="submit-btn" type="submit">Create Card</button>
+            </form>
+        </div>
+
+        <!-- Cards List -->
+        <div class="cards-list" id="cardsList"></div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-message">Success!</span>
+    </div>
+
+    <script src="/js/PCM.js"></script>
+    <script>
+        // Firebase configuration - replace with your actual config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+        });
+
+        function initApp() {
+            // Check auth state
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    currentUser = user.uid;
+                    loadCards();
+                } else {
+                    // No user is signed in, redirect to login
+                    window.location.href = '/login.html';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
